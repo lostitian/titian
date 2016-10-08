@@ -1,0 +1,4 @@
+Hey:
+Welcome to our site, to reset your account please click on the following link:
+{{url_for('auth.forget_reset', token=token, _external=True)}}
+Thanks.
