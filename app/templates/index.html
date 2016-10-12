@@ -1,5 +1,13 @@
 {% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
+
+{% block scripts %}
+{{super()}}
+{{ pagedown.include_pagedown() }}
+{% endblock %}
+
+
 
 {% block page_content %}
 <div class="page-header">
@@ -13,4 +21,10 @@
 	</h1>
 </div>
 {{ wtf.quick_form(form)}}
+{% include "_posts.html" %}
+{% if pagination %}
+<div class="pagination">
+	{{macros.pagination_widget(pagination, '.index')}}
+</div>
+{% endif %}
 {% endblock %}

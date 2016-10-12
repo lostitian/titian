@@ -6,11 +6,23 @@ from .forms import LoginForm, RegistrationForm, ChangePasswordForm, ForgetPasswo
 from ..models import User, Role
 from ..email import send_email
 
+
+@auth.before_app_request
+def before_request():
+	if current_user.is_authenticated:
+		current_user.ping()
+		if not current_user.confirmed \
+			and request.endpoint[:5] != 'auth.':
+			return redirect(url_for('auth.unconfirmed'))
+
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
 	form = LoginForm()
 	if form.validate_on_submit():
-		user=User.query.filter_by(email=form.email.data).first()
+		try:
+			user=User.query.filter_by(email=form.email.data).first()
+		except:
+			user=None
 		if user is not None and user.verify_password(form.password.data):
 			login_user(user, form.remember_me.data)
 			return redirect(request.args.get('next') or url_for('main.index'))
@@ -47,14 +59,6 @@ def confirm(token):
 	else:
 		flash('The confirmation link is invalid of has expired.')
 	return redirect(url_for('main.index'))
-
-@auth.before_app_request
-def before_request():
-	if current_user.is_authenticated \
-		and not current_user.confirmed \
-		and request.endpoint[:5] != 'auth.' \
-		and request.endpoint != 'static':
-		return redirect(url_for('auth.unconfirmed'))
 
 @auth.route('/unconfirmed')
 def unconfirmed():
